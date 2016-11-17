@@ -3,17 +3,19 @@
 require "classes/Set"
 require "classes/Parser"
 require "classes/RuleInducer"
---require "tests/setTest"
+require "tests/setTest"
 
 
 --parser = Parser:new()
 --parser:parse()
+--[[
 inducer = RuleInducer:new()
 inducer:fillTestData()
 inducer:getAttributeValues()
 inducer:printAttributeValues()
 inducer:calcDstar()
 inducer:calcAstar()
+--]]
 
 print('done!')
 

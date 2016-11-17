@@ -33,6 +33,14 @@ io.write("v2\t")
 v2:printSet()
 io.write("|v2| = " .. v2:cardinality() .. "\n")
 
+--compute difference
+io.write("v1 - v2\n")
+temp1 = v1:difference(v2)
+temp1:printSet()
+io.write("v2 - v1\n")
+temp2 = v2:difference(v1)
+temp2:printSet()
+
 --calculate the intersection and union of sets 1 and 2
 re1 = v1:intersect(v2)
 re2 = v1:union(v2)

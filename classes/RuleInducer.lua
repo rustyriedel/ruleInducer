@@ -14,7 +14,8 @@ function RuleInducer:new()
       attributeValues = {},
       concepts = {},
       Dstar = {},
-      Astar = {}
+      Astar = {}, 
+      avBlocks = {}
    }
    setmetatable(o, self)
    return o
@@ -116,6 +117,19 @@ function RuleInducer:calcDstar()
       end
    end
 end
+
+function RuleInducer:calcAVBlocks()
+   --build avBlock sets for the each av pair
+   --[[for k, v in pairs(self.attibuteValues) do
+      
+   for i = 1, self.numAttributes do
+      avBlocks[i] = Set:new()
+      
+      for j = 1, self.numCases do
+       --]]  
+         
+end
+
 
 function RuleInducer:printAttributeValues()
    --print out the set of values for each attribute

@@ -63,6 +63,20 @@ function Set:intersect(pSet)
    return result
 end
 
+function Set:difference(pSet)
+   local result = Set:new()
+   
+   --calculate the difference
+   for i in pairs(self.data) do
+      if(pSet.data[i] ~= true) then
+         result:insert(i)
+      end
+   end
+   
+   --return the resulting set
+   return result
+end
+
 function Set:subset(pSet)
    --check if left is larger than right, if so
    --left cannot be a subset
