@@ -1,6 +1,11 @@
-< a a a d >
+< a a 
+a 
+d >
 !this is a comment
-[ Height Hair Eyes Attractive ]
+[ Height 
+Hair Eyes 
+Attractive 
+]
 short blonde blue +
 tall blonde brown -
 tall red blue +
