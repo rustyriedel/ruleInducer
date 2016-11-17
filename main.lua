@@ -13,6 +13,7 @@ inducer:fillTestData()
 inducer:getAttributeValues()
 inducer:printAttributeValues()
 inducer:calcDstar()
+inducer:calcAstar()
 
 print('done!')
 

@@ -27,7 +27,8 @@ function RuleInducer:fillTestData()
    self.decisionName = "Attractive"
    
    self.cases[1] = {"short", "blonde",   "blue",  "+"}
-   self.cases[2] = {"tall",  "blonde",   "brown", "-"}
+   --self.cases[2] = {"tall",  "blonde",   "brown", "-"}
+   self.cases[2] = {"short", "blonde",   "blue",  "+"}
    self.cases[3] = {"tall",  "red",      "blue",  "+"}
    self.cases[4] = {"short", "dark",     "blue",  "-"}
    self.cases[5] = {"tall",  "dark",     "blue",  "-"}
@@ -57,32 +58,49 @@ function RuleInducer:getAttributeValues()
 end
 
 function RuleInducer:calcAstar()
+   local countedCase = {}
+   local currCase = 1
+   local equalFlag = true
+   
    --create the partitions for each concept in A*
-   self.Astar[1] = Set:new()
-   
-   --insert the first case
-   self.Astar[1]:insert(1)
-   
-   --check if any other cases are in the same set
-   for i = 1, self.numCases do
-      --check if each case is the same and add it to the set
-   end
-   ---------------------------------------
-   --[[for k, v in pairs(self.attributeValues) do
-      self.Astar[k] = Set:new()   
-   end
-   --]]
-   
+   while currCase <= self.numCases do
+      self.Astar[currCase] = Set:new()
+
+      --insert the first case
+      self.Astar[currCase]:insert(currCase)
+      countedCase[currCase] = true
       
-   --[[   
-      --add each case to A*
-      for i = 1, self.numCases do
-         if(self.cases[i][self.numAttributes + 1] == k) then
-            self.Dstar[k]:insert(i)
+      --check if any other cases are in the same set
+      for i = currCase, self.numCases do
+         
+         --check if each case is the same and add it to the set
+         --check if case i has already been added
+         if(countedCase[i] ~= true) then
+            --i not added, check for equality with currCase
+            for j = 1, self.numAttributes do
+               if(self.cases[i][j] ~= self.cases[currCase][j]) then
+                  equalFlag = false
+                  break
+               end
+            end
+            
+            --if the flag is true then the cases matched, add i
+            if(equalFlag == true) then
+               self.Astar[currCase]:insert(i)
+               countedCase[i] = true
+            else
+               equalFlag = true
+            end
          end
+         
       end
-   end
-   --]]
+      
+      --get the next case that is not already in a set
+      for k,v in ipairs(countedCase) do
+         currCase = k + 1
+      end
+      
+   end--end while
 end
 
 function RuleInducer:calcDstar()
