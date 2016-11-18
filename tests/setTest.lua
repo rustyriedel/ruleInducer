@@ -34,10 +34,10 @@ v2:printSet()
 io.write("|v2| = " .. v2:cardinality() .. "\n")
 
 --compute difference
-io.write("v1 - v2\n")
+io.write("v1 - v2 = ")
 temp1 = v1:difference(v2)
 temp1:printSet()
-io.write("v2 - v1\n")
+io.write("v2 - v1 = ")
 temp2 = v2:difference(v1)
 temp2:printSet()
 
