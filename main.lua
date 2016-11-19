@@ -11,15 +11,8 @@ require "classes/RuleInducer"
 --parser:parse()
 ---[[
 inducer = RuleInducer:new()
-inducer:fillTestData()
-inducer:getAttributeValues()
---inducer:printAttributeValues()
-inducer:calcDstar()
-inducer:calcAstar()
-inducer:calcAVBlocks()
 inducer:run()
 
---inducer:printAVBlocks()
 --inducer:calcCutpoints()
 --print(inducer:calcValue(1, 1))
 
@@ -28,5 +21,14 @@ inducer:run()
 print('done!')
 
 
+--TODO
+--cutpoints
+--upper and lower approximations
+--v(case, attribute) for * ? -
+--parse file and return proper data
+--input interface
+--test several data sets
 
+--stretch
+--(calc A* subset {d}* to see if you need to see if data set is consistant, if not make approximations.)
 

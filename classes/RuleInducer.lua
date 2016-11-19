@@ -18,10 +18,22 @@ function RuleInducer:new()
       Astar = {}, 
       avBlocks = {},
 
-      coverage = {}
+      coverage = {},
+      
+      outputFile = "ruleSet.txt"
    }
    setmetatable(o, self)
    return o
+end
+
+function RuleInducer:run()
+   self:fillTestData()
+   self:getAttributeValues()
+   --self:printAttributeValues()
+   self:calcAstar()
+   self:calcDstar()
+   self:calcAVBlocks()
+   self:induceRules()
 end
 
 function RuleInducer:fillTestData()
@@ -244,7 +256,7 @@ function RuleInducer:getNextGoal()
    return 0
 end
 
-function RuleInducer:run()
+function RuleInducer:induceRules()
    local finished = false
    local ruleSet = {}
    
@@ -334,9 +346,7 @@ function RuleInducer:run()
    end
    
    --print the rules set
-   for k, v in pairs(ruleSet) do
-      print(v)
-   end
+   self:writeRuleSetToFile(ruleSet)
 end
 
 function RuleInducer:pickAVpair(pPairs, pG)
@@ -489,6 +499,16 @@ function RuleInducer:getRuleString(pRule, pConcept)
    str = str .. " -> (" .. self.decisionName .. ", " .. pConcept .. ")"
    
    return str
+end
+
+function RuleInducer:writeRuleSetToFile(pRuleSet)
+   local f = io.open(self.outputFile, "w+")
+   for k, v in pairs(pRuleSet) do
+      print(v)
+      f:write(v .. "\n")
+   end
+   
+   f.close()
 end
 
 
