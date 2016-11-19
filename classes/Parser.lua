@@ -55,28 +55,6 @@ function Parser:parse()
    f:close()
 end
 
---split string helper function, splits string into words.
-function string:split(splitPattern, startIndex, resultTable)
-
-   if not resultTable then
-      resultTable = { }
-   end
-   if not startIndex then
-      theStart = 1
-   else
-      theStart = startIndex
-   end
-   
-   local theSplitStart, theSplitEnd = string.find( self, splitPattern, theStart )
-   while theSplitStart do
-      table.insert( resultTable, string.sub( self, theStart, theSplitStart-1 ) )
-      theStart = theSplitEnd + 1
-      theSplitStart, theSplitEnd = string.find( self, splitPattern, theStart )
-   end
-   table.insert( resultTable, string.sub( self, theStart ) )
-   return resultTable
-end
-
 function Parser:countAttributes(pLineBuffer)
    --split the first line
    self.words = pLineBuffer:split(' ')

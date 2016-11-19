@@ -25,6 +25,7 @@ function RuleInducer:new()
 end
 
 function RuleInducer:fillTestData()
+   ---[[
    self.numAttributes = 3
    self.numCases = 8
    self.attributeNames = {"Height", "Hair", "Eyes"}
@@ -39,6 +40,22 @@ function RuleInducer:fillTestData()
    self.cases[6] = {"tall",  "blonde",   "blue",  "+"}
    self.cases[7] = {"tall",  "dark",     "brown", "-"}
    self.cases[8] = {"short", "blonde",   "brown", "-"}
+   --]]
+   --[[--INCONSISTANT DATA SET FROM HOMEWORK #2
+   self.numAttributes = 4
+   self.numCases = 8
+   self.attributeNames = {"Size", "Color", "Feel", "Temperature"}
+   self.decisionName = "Attitude"
+
+   self.cases[1] = {"big", "yellow", "soft", "low", "positive"}
+   self.cases[2] = {"big", "yellow", "hard", "high", "negative"}
+   self.cases[3] = {"medium", "yellow", "soft", "high", "positive"}
+   self.cases[4] = {"medium", "blue", "hard", "high", "so-so"}
+   self.cases[5] = {"medium", "blue", "hard", "high", "so-so"}
+   self.cases[6] = {"medium", "blue", "soft", "low", "negative"}
+   self.cases[7] = {"big", "blue", "hard", "low", "so-so"}
+   self.cases[8] = {"big", "blue", "hard", "high", "so-so"}
+   --]]
 end
 
 function RuleInducer:getAttributeValues()
@@ -204,7 +221,7 @@ function RuleInducer:getNextGoal()
    --check what goal is not covered
    for k, v in pairs(self.coverage) do
       if( v ~= true) then
-         return self.Dstar[k]
+         return clone(self.Dstar[k]), k
       end
    end
 
@@ -213,56 +230,96 @@ function RuleInducer:getNextGoal()
 end
 
 function RuleInducer:run()
-   --get the goal
-   local G = self:getNextGoal()
-   --G = Set:new()
-   --G:insert(3)
+   local finished = false
+   local ruleSet = {}
    
-   --if G = 0, coverage has been provided for all concepts in {d}*
-   if(G == 0) then
-      --FINISHED INDUCING RULES!!
-      --TODO print out the rules
-      print("FINISHED INDUCING RULES!!")
-   end
+   local rule = {}
+   local ruleIndex = 1
+   local avBlocks = clone(self.avBlocks)
    
-   --print the goal for debugging
-   io.write("G = ")
-   G:printSet()
+   --get the first goal 
+   local G, conceptName = self:getNextGoal()
+   local remainingG = G
 
-   --calculate the intersections of avBlocks with G
-   local i = 1
-   local col = {}
-   for k, v in pairs(self.avBlocks) do
-      for m, n in pairs(self.av[k]) do
-         --fill each column with its relevance data
-         col[i] = {}
-         col[i].attr = k
-         col[i].val = m
-         col[i].set = Set:new()
-         col[i].set = self.avBlocks[k][m]:intersect(G)
-         col[i].size = col[i].set:cardinality()
-         i = i + 1
+   --induce rules for to cover the dataset via LEM2
+   while(finished == false) do
+      --print the goal for debugging
+      io.write("G = ")
+      G:printSet()
+      
+      --calculate the intersections of avBlocks with G
+      local col = self:calcCol(avBlocks, G)
+      
+      --pick the best a,v pair
+      local pickAttr, pickVal = self:pickAVpair(col)
+      local pick = avBlocks[pickAttr][pickVal]
+      
+      --check if the a,v pair is a subset of G, if not compute new G
+      --and continue adding a,v pairs until it is a subset
+      --add the condition to the rule table
+      rule[ruleIndex] = {}
+      rule[ruleIndex].attr = pickAttr
+      rule[ruleIndex].val = pickVal
+      rule[ruleIndex].set = pick
+      ruleIndex = ruleIndex + 1
+         
+      --check if the rule is consistant with G
+      local isConsistant = self:isRuleConsistant(rule, G)
+      --if consistant, add the rule to the ruleset and compute new G
+      if(isConsistant) then
+         --try dropping conditions
+         local finalRule = self:reduceRule(rule, G)
+         
+         --add the rule to the ruleset
+         local ruleStr = self:getRuleString(finalRule, conceptName)
+         table.insert(ruleSet, ruleStr)
+         
+         --clear the rule
+         rule = {}
+         ruleIndex = 1
+         
+         --check if G is covered
+         local ruleCover = self:ruleCoverage(finalRule)
+         remainingG = remainingG:difference(ruleCover)
+         if(remainingG:cardinality() == 0) then
+            --the concept is covered, mark it on the table
+            self.coverage[conceptName] = true
+            
+            --get new concept for G, if new G = 0, end loop
+            G, conceptName = self:getNextGoal()
+            remainingG = G
+            
+            if(G == 0) then
+               print("FINISHED INDUCING RULES!!")
+               finished = true
+            end
+         else
+            --reset the [(a,v)] pairs available
+            avBlocks = clone(self.avBlocks)
+            
+            --next G = remaining cases to cover
+            G = remainingG
+         end
+      else
+         --otherwise compute new G and add more conditions to rule
+         print("!NEED ANOTHER CONDITION!")
+         local ruleCover = self:ruleCoverage(rule)
+         G = G:intersect(ruleCover)
+         
+         --remove the condition from the local avBlocks table
+         avBlocks[pickAttr][pickVal] = nil
       end
+      
+      print("done with iteration!")
    end
-
-   --pick the best a,v pair
-   local pickAttr, pickVal = self:pickAVpair(col)
-   local pick = self.avBlocks[pickAttr][pickVal]
    
-   --check if the a,v pair is a subset of G, if not compute new G
-   --and continue adding a,v pairs until it is a subset
-   print(pick:subset(G))
-   
-   --try dropping conditions
-   
-   
-   --check for coverage of the concept, if covered,
-   --mark if off the coverage table
-
-   print("done with iteration!")
+   --print the rules set
+   for k, v in pairs(ruleSet) do
+      print(v)
+   end
 end
 
-function RuleInducer:pickAVpair(pPairs)
+function RuleInducer:pickAVpair(pPairs, pG)
    --pick the a,v pair with largest size, if tie continue on
    --add each size to the ordered table to sort
    local ordered = {}
@@ -322,3 +379,92 @@ function RuleInducer:pickAVpair(pPairs)
    return pPairs[smallestIndex].attr, pPairs[smallestIndex].val
    
 end
+
+function RuleInducer:reduceRule(pRule, pG)
+   local result = clone(pRule)
+   --return rule if only 1 condition
+   if(#result > 1) then
+      --try dropping conditions
+      --mark a rule to drop with droppedIndex
+      for droppedIndex = 1, #result do
+         local testRule = {}
+         for k, v in pairs(result) do
+            if(k ~= droppedIndex) then
+               --add to test rule
+               table.insert(testRule, result[k])
+            end
+         end
+         
+         --check if testRule is consistant with G,
+         --if so drop the rule at droppedIndex
+         if(self:isRuleConsistant(testRule, pG)) then
+            --drop the condition
+            result[droppedIndex] = nil
+         end
+      end
+      
+      return result
+   end
+   return result
+end
+
+function RuleInducer:ruleCoverage(pRule)
+  --compute intersection of each rule
+   local result = pRule[1].set
+   if(#pRule > 1) then
+      for i = 2, #pRule do
+         result = result:intersect(pRule[i].set)
+      end
+   end
+   
+   return result
+end
+
+function RuleInducer:isRuleConsistant(pRule, pG)
+   --compute intersection of each rule
+   local result = self:ruleCoverage(pRule)
+   
+   --check if the intersection of the conditions is a subset of pG
+   if(result:subset(pG)) then
+      return true
+   else
+      return false
+   end
+end
+
+--calculates the intersection of [(a,v)] with G
+function RuleInducer:calcCol(pAvBlocks, pG)
+   local i = 1
+   local col = {}
+   for k, v in pairs(pAvBlocks) do
+      for m, n in pairs(pAvBlocks[k]) do
+         --fill each column with its relevance data
+         col[i] = {}
+         col[i].attr = k
+         col[i].val = m
+         --col[i].set = Set:new()
+         col[i].set = n:intersect(pG)
+         col[i].size = col[i].set:cardinality()
+         i = i + 1
+      end
+   end
+   
+   return col
+end
+   
+function RuleInducer:getRuleString(pRule, pConcept)
+   local str = ""
+   for k, v in pairs(pRule) do
+      str = str .. "(" .. v.attr .. ", " .. v.val .. ")"
+      if(pRule[k+1] ~= nil) then
+         str = str .. " & "
+      end
+   end
+   
+   str = str .. " -> (" .. self.decisionName .. ", " .. pConcept .. ")"
+   
+   return str
+end
+
+
+
