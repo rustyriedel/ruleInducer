@@ -36,8 +36,22 @@ function RuleInducer:run()
    self:induceRules()
 end
 
+function RuleInducer:parseData()
+   local fileParser = Parser:new()
+   fileParser:parse()
+   
+   self.numAttributes = fileParser.numAttributes
+   self.numCases = #fileParser.cases
+   self.attributeNames = fileParser.attributeNames
+   self.decisionName = fileParser.decisionName
+   self.cases = fileParser.cases
+   
+   --print for DEBUG
+   print("!!DONE PARSING!!")
+end
+
 function RuleInducer:fillTestData()
-   ---[[
+   --[[
    self.numAttributes = 3
    self.numCases = 8
    self.attributeNames = {"Height", "Hair", "Eyes"}

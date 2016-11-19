@@ -11,6 +11,7 @@ require "classes/RuleInducer"
 --parser:parse()
 ---[[
 inducer = RuleInducer:new()
+inducer:parseData()
 inducer:run()
 
 --inducer:calcCutpoints()

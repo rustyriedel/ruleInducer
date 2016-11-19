@@ -3,20 +3,16 @@
 Parser = {}
 Parser.__index = Parser
 
---state 1 = get number of attributes between < >
---state 2 = get the attribute names and decision name
---state 3 = create cases
-
 --constructor
 function Parser:new()
    local o = {
       numAttributes = 0,
-      count = 1,
       attributeNames = {},
       decisionName = "none",
       words = {},
+      cases = {},
       
-      state = 1,
+      wordIndex = 2,
       filePath = "datasets/normal/attractive.txt"
    }
    setmetatable(o, self)
@@ -27,68 +23,79 @@ function Parser:parse()
    --open the file to parse
    local f = assert(io.open(self.filePath, "r"))
    
-   --read the file line by line and parse it
-   for _ in io.lines(self.filePath) do
-      local lineBuffer = f:read("*l")
-      
-      --check if line is a comment, if so disregard
-      if string.sub(lineBuffer, 1, 1) == "!" then
-         print(lineBuffer)
-      --check if the first line of the file
-      elseif (self.state == 1) then
-         self:countAttributes(lineBuffer)
-      elseif(self.state == 2) then
-         self:getAttributeNames(lineBuffer)
-      --make the substring into words delemited by spaces
-      else
-         self.words = lineBuffer:split(' ')
-      end
-      
-      --[[ --print out the words table for debugging
-      for i = 1, #words do
-         print(words[i])
-      end
-      --]]
+   --read the file contents into a buffer variable
+   local buffer = f:read("*a")
+   
+   --remove comments from the buffer before processing the 
+   --rest of the file using a regular expression for pattern matching
+   local removeStr = buffer:match("[!]+[^\n]*[\n]")
+   while(removeStr ~= nil) do
+      buffer = buffer:gsub(removeStr, "")
+      removeStr = buffer:match("[!]+[^\n]*[\n]")
    end
+   
+   --split the rest of the buffer into words 
+   --seperated by spaces, tabs and newline characters
+   for w in buffer:gmatch("%S+") do   
+      table.insert(self.words, w)
+   end
+   
+   --parse the words table to populate the parser variables
+   self:parseWords()
    
    --close the input file
    f:close()
 end
 
-function Parser:countAttributes(pLineBuffer)
-   --split the first line
-   self.words = pLineBuffer:split(' ')
-   
-   --count the number of 'a's in the file = number of attributes
-   for i = 1, #self.words do
-      if(self.words[i] == 'a') then
-         self.numAttributes = self.numAttributes  + 1
-      elseif (self.words[i] == '>') then
-         self.state = 2
-          print("number of attributes: " .. self.numAttributes)
+function Parser:parseWords()
+   --count the number of attributes
+   while(true) do
+      
+      if(self.words[self.wordIndex] == 'a' or 
+            self.words[self.wordIndex] == 'x') then
+         self.numAttributes = self.numAttributes + 1
+         self.wordIndex = self.wordIndex + 1
+      elseif(self.words[self.wordIndex] == '>') then
+         self.wordIndex = self.wordIndex + 1
+         break
+      else
+         self.wordIndex = self.wordIndex + 1
       end
+   end
+   
+   --skip the "[" for the attribute list
+   self.wordIndex = self.wordIndex + 1
+   
+   --add each attribute name to the attributeNames table
+   for i = 1, self.numAttributes do
+      self.attributeNames[i] = self.words[self.wordIndex]
+      self.wordIndex = self.wordIndex + 1
+   end
+
+   --the next word will be the decision name so enter it
+   self.decisionName = self.words[self.wordIndex]
+   self.wordIndex = self.wordIndex + 1
+   
+   --skip the "]" for the attribute list
+   self.wordIndex = self.wordIndex + 1
+   
+   --fill each case with its values 
+   local caseIndex = 1
+   while(self.wordIndex < #self.words) do
+      --make a new case
+      self.cases[caseIndex] = {}
+      
+      --fill the case with its attributes and decision
+      for i = 1, self.numAttributes + 1 do
+         self.cases[caseIndex][i] = self.words[self.wordIndex]
+         self.wordIndex = self.wordIndex + 1
+      end
+      
+      --increment the caseIndex
+      caseIndex = caseIndex + 1
    end
 end
 
-function Parser:getAttributeNames(pLineBuffer)
-   --split the first line
-   self.words = pLineBuffer:split(' ')
-   
-   --add each name to the 
-   for i = 1, #self.words do
-      if(self.words[i] == ('[' or '')) then
-         --disregard
-      elseif(self.count <= self.numAttributes) then
-         table.insert(self.attributeNames, self.words[i])
-         self.count = self.count + 1
-      elseif(self.count == self.numAttributes + 1)then
-         self.decisionName = self.words[i]
-         self.count = self.count + 1
-      elseif(self.words[i] == ']') then
-         self.state = 3
-      end
-   end
-end
 
 
 
