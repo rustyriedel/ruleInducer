@@ -41,6 +41,21 @@ function RuleInducer:fillTestData()
    self.cases[7] = {"tall",  "dark",     "brown", "-"}
    self.cases[8] = {"short", "blonde",   "brown", "-"}
    --]]
+   --[[
+   self.numAttributes = 3
+   self.numCases = 8
+   self.attributeNames = {"Wind", "Humidity", "Temperature"}
+   self.decisionName = "Trip"
+
+   self.cases[1] = {"low",    "low",      "medium",   "yes"}
+   self.cases[2] = {"low",    "low",      "low",      "yes"}
+   self.cases[3] = {"low",    "medium",   "medium",   "yes"}
+   self.cases[4] = {"low",    "medium",   "high",     "maybe"}
+   self.cases[5] = {"medium", "low",      "medium",   "maybe"}
+   self.cases[6] = {"medium", "high",     "low",      "no"}
+   self.cases[7] = {"high",   "high",     "high",     "no"}
+   self.cases[8] = {"medium", "high",     "high",     "no"}
+   --]]
    --[[--INCONSISTANT DATA SET FROM HOMEWORK #2
    self.numAttributes = 4
    self.numCases = 8
@@ -239,7 +254,8 @@ function RuleInducer:run()
    
    --get the first goal 
    local G, conceptName = self:getNextGoal()
-   local remainingG = G
+   local initialG = clone(G)
+   local remainingG = clone(G)
 
    --induce rules for to cover the dataset via LEM2
    while(finished == false) do
@@ -268,7 +284,7 @@ function RuleInducer:run()
       --if consistant, add the rule to the ruleset and compute new G
       if(isConsistant) then
          --try dropping conditions
-         local finalRule = self:reduceRule(rule, G)
+         local finalRule = self:reduceRule(rule, initialG)
          
          --add the rule to the ruleset
          local ruleStr = self:getRuleString(finalRule, conceptName)
@@ -285,9 +301,13 @@ function RuleInducer:run()
             --the concept is covered, mark it on the table
             self.coverage[conceptName] = true
             
+            --reset the [(a,v)] pairs available
+            avBlocks = clone(self.avBlocks)
+            
             --get new concept for G, if new G = 0, end loop
             G, conceptName = self:getNextGoal()
-            remainingG = G
+            initialG = clone(G)
+            remainingG = clone(G)
             
             if(G == 0) then
                print("FINISHED INDUCING RULES!!")
@@ -403,7 +423,12 @@ function RuleInducer:reduceRule(pRule, pG)
          end
       end
       
-      return result
+      --make a contiguous 1 indexed table to return
+      local final = {}
+      for k, v in pairs(result) do
+         table.insert(final, result[k])
+      end
+      return final
    end
    return result
 end
