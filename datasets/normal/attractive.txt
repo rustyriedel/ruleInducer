@@ -1,11 +1,11 @@
 < a a a d >
 !this is a comment
 [ Height Hair Eyes Attractive ]
-short 	blonde 	blue +
-tall 	blonde 	brown -
+-	blonde 	blue +
+* 	blonde 	brown -
 tall 	red 	blue +
-short 	dark 	blue -
+?	dark 	blue -
 tall 	dark 	blue -
 tall 	blonde 	blue +
-tall 	dark brown -
+*	dark brown -
 short 	blonde brown -

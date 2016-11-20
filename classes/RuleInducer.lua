@@ -143,7 +143,9 @@ function RuleInducer:getAttributeValues()
          --enter each value for its respective attribute
          for i = 1, self.numCases do
             local temp = self.cases[i][k]
-            self.av[v][temp] = true
+            if(temp ~= "*" and temp ~= "?" and temp ~= "-") then
+               self.av[v][temp] = true
+            end
          end
       end
    end
@@ -264,9 +266,16 @@ function RuleInducer:calcAVBlocks()
                   end
                end
             end
+         elseif(type(val) == "table") then
+            --* and - values will return a table, so add each
+            --value in the table to its appropriate set
+            for k, v in pairs(val) do
+               self.avBlocks[attr][v]:insert(i)
+            end
+         elseif(val == "?") then
+            --lost data so disregard, dont enter it anywhere.
          else
-            
-            --enter the value into the appropriate set
+            --symbolic value so enter it into the appropriate set
             self.avBlocks[attr][val]:insert(i)
          end
       end
@@ -274,7 +283,73 @@ function RuleInducer:calcAVBlocks()
 end
 
 function RuleInducer:calcValue(pCase, pAttribute)
-   return self.cases[pCase][pAttribute]
+   local value = self.cases[pCase][pAttribute]
+   if(value ~= "*" and value ~= "-") then
+      --if symbolic, numeric, or lost data (?) simply return value
+      return value
+   elseif(value == "*") then
+      --dont care value, return a table of all values in the attribute
+      local dontCare = {}
+      local attr = self.attributeNames[pAttribute]
+      for k, v in pairs(self.av[attr]) do
+         print(k)
+         table.insert(dontCare, k)
+      end
+      return dontCare
+   else
+      --attibute concept value (-), must vote on what the proper
+      --value(s) to return in a table
+      local attributeConcept = {}
+      local votes = {}
+      local concept = self.cases[pCase][self.numAttributes + 1]
+      
+      for k, v in pairs(self.Dstar[concept].data) do
+         -- k = case in the concept
+         local vote = self.cases[k][pAttribute]
+         if(vote ~= "-" and vote ~= "?") then
+            print(vote)
+            if(votes[vote] == nil) then
+               votes[vote] = 1
+            else
+               votes[vote] = votes[vote] + 1
+            end
+         end
+      end
+      
+      --check which vote wins, if multiple tie, add the ties
+      --find the most popular vote
+      local popular = 0
+      for k, v in pairs(votes) do
+         if(v > popular) then
+            popular = v
+         end
+      end
+      
+      --nobody voted (- is the only value in the concept)
+      --return a ? so it is not added
+      if(popular == 0) then
+         return "?"
+      end
+      
+      --fill the attributeConcept table with the popular values
+      for k, v in pairs(votes) do
+         if(v == popular) then
+            --if * is a popular value, enter all values and break
+            if(k == "*") then
+               local attr = self.attributeNames[pAttribute]
+               for m, n in pairs(self.av[attr]) do
+                  table.insert(attributeConcept, m)
+               end
+               break
+            end
+            --enter all the popular values
+            table.insert(attributeConcept, k)
+         end
+      end
+      
+      --return the values for -
+      return attributeConcept
+   end
 end
 
 function RuleInducer:printAttributeValues()
