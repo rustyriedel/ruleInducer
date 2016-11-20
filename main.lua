@@ -23,12 +23,11 @@ print('done!')
 
 
 --TODO
---cutpoints
 --upper and lower approximations
 --v(case, attribute) for * ? -
---parse file and return proper data
 --input interface
 --test several data sets
+--figure out regex for descritization
 
 --stretch
 --(calc A* subset {d}* to see if you need to see if data set is consistant, if not make approximations.)

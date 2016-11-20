@@ -11,9 +11,10 @@ function Parser:new()
       decisionName = "none",
       words = {},
       cases = {},
+      needsDescritization = {},
       
       wordIndex = 2,
-      filePath = "datasets/normal/attractive.txt"
+      filePath = "datasets/normal/test.txt"
    }
    setmetatable(o, self)
    return o
@@ -63,6 +64,11 @@ function Parser:parseWords()
       end
    end
    
+   --initialize the needsDescritization table
+   for i = 1, self.numAttributes do
+      self.needsDescritization[i] = false
+   end
+   
    --skip the "[" for the attribute list
    self.wordIndex = self.wordIndex + 1
    
@@ -88,6 +94,11 @@ function Parser:parseWords()
       --fill the case with its attributes and decision
       for i = 1, self.numAttributes + 1 do
          self.cases[caseIndex][i] = self.words[self.wordIndex]
+         local temp = self.cases[caseIndex][i]
+         print(temp:match("%d+[^'..']*%d*"))
+--         if(self.cases[caseIndex][i].type()) then
+--            self.needsDescritization[caseIndex] = true
+--         end
          self.wordIndex = self.wordIndex + 1
       end
       

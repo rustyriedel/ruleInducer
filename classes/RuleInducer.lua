@@ -19,6 +19,8 @@ function RuleInducer:new()
       avBlocks = {},
 
       coverage = {},
+      needsDescritization = {},
+      ranges = {},
       
       outputFile = "ruleSet.txt"
    }
@@ -27,7 +29,7 @@ function RuleInducer:new()
 end
 
 function RuleInducer:run()
-   self:fillTestData()
+   --self:fillTestData()
    self:getAttributeValues()
    --self:printAttributeValues()
    self:calcAstar()
@@ -45,6 +47,13 @@ function RuleInducer:parseData()
    self.attributeNames = fileParser.attributeNames
    self.decisionName = fileParser.decisionName
    self.cases = fileParser.cases
+   self.needsDescritization = fileParser.needsDescritization
+   
+   --used to overwrite the data for testing of cutpoints DEBUG
+   self:fillTestData()
+   
+   --descritize the data set if needed
+   self:descritize()
    
    --print for DEBUG
    print("!!DONE PARSING!!")
@@ -97,6 +106,25 @@ function RuleInducer:fillTestData()
    self.cases[7] = {"big", "blue", "hard", "low", "so-so"}
    self.cases[8] = {"big", "blue", "hard", "high", "so-so"}
    --]]
+   ---[[
+   self.numAttributes = 3
+   self.numCases = 7
+   self.attributeNames = {"A", "B", "C"}
+   self.decisionName = "D"
+   
+   self.cases[1] = {0.8, 0.3, 7.2,  "very-small"}
+   self.cases[2] = {0.8, 1.1, 7.2,  "small"}
+   self.cases[3] = {0.8, 1.1, 10.2, "medium"}
+   self.cases[4] = {1.2, 0.3, 10.2, "medium"}
+   self.cases[5] = {1.2, 2.3, 10.2, "medium"}
+   self.cases[6] = {2.0, 2.3, 10.2, "high"}
+   self.cases[7] = {2.0, 2.3, 15.2, "very-high"}
+   
+   --for DEBUG
+   for i = 1, 3 do
+      self.needsDescritization[i] = true
+   end
+   --]]
 end
 
 function RuleInducer:getAttributeValues()
@@ -105,10 +133,19 @@ function RuleInducer:getAttributeValues()
       --add a subtable for each attribute
       self.av[v] = {}
 
-      --enter each value for its respective attribute
-      for i = 1, self.numCases do
-         local temp = self.cases[i][k]
-         self.av[v][temp] = true
+      --add ranges as a,v pairs if the attribute was descritized
+      if(self.needsDescritization[k]) then
+         for m, n in pairs(self.ranges) do
+            if(n.attr == k) then
+               self.av[v][m] = true
+            end
+         end
+      else
+         --enter each value for its respective attribute
+         for i = 1, self.numCases do
+            local temp = self.cases[i][k]
+            self.av[v][temp] = true
+         end
       end
    end
 
@@ -193,9 +230,26 @@ function RuleInducer:calcAVBlocks()
    for i = 1, self.numCases do
       for j = 1, self.numAttributes do
          local attr = self.attributeNames[j]
-         local val = self.cases[i][j]
-         local value = self:calcValue(i, j)
-         self.avBlocks[attr][value]:insert(i)
+         --local val = self.cases[i][j]
+         local val = self:calcValue(i, j)
+         --if the value is a number, insert it into each appropriate
+         --[(a,v)] block if it fits into the range
+         if(type(val) == "number") then
+            --get a range
+            for k, v in pairs(self.ranges) do
+               --check if that range is for the current attribute
+               if(v.attr == j) then
+                  --check if the value fits in the range
+                  if(val >= v.low and val <= v.high) then
+                     self.avBlocks[attr][k]:insert(i)
+                  end
+               end
+            end
+         else
+            --enter the value into the appropriate set
+            --local value = self:calcValue(i, j)
+            self.avBlocks[attr][val]:insert(i)
+         end
       end
    end
 end
@@ -228,32 +282,6 @@ function RuleInducer:printAVBlocks()
       for m, n in pairs(self.av[k]) do
          io.write("[(" .. k .. ", " .. m .. ")] = ")
          self.avBlocks[k][m]:printSet()
-      end
-   end
-end
-
-function RuleInducer:calcCutpoints()
-   local numCases = 8
-   local data = {4, 8, 4, 8, 12, 16, 30, 12}
-
-   --sort the data
-   table.sort(data)
-   local smallest = data[1]
-   local largest = data[#data]
-
-   --create cutpoints
-   for k,v in pairs(data) do
-      if(data[k + 1] ~= nil) then
-         local curr = v
-         local nxt = data[k + 1]
-
-         --if curr = next dont make a cutpoint,
-         --else find the average and store it
-         if(curr ~= nxt) then
-            local cutpoint = ((curr + nxt) / 2)
-            io.write(smallest .. ".." .. cutpoint .. " , ")
-            io.write(cutpoint .. ".." .. largest .. "\n")
-         end
       end
    end
 end
@@ -525,5 +553,57 @@ function RuleInducer:writeRuleSetToFile(pRuleSet)
    f.close()
 end
 
+function RuleInducer:descritize()
+   --check if data set needs descritization
+   --calculate for each attribute that needs descritization
+   for k, v in pairs(self.needsDescritization) do
+      if(v) then
+         local values = {}
+
+         --add every numerical attribute the the values table
+         for i = 1, self.numCases do
+            local val = self.cases[i][k]
+            --if(val ~= "?" or val ~= "*" or val ~= "-") then
+            if(type(val) == "number") then
+               --print(val)
+               table.insert(values, val)
+            end
+         end
+
+         --sort the data
+         table.sort(values)
+         local smallest = values[1]
+         local largest = values[#values]
+
+         --create cutpoints
+         for m, n in pairs(values) do
+            if(values[m + 1] ~= nil) then
+               local curr = n
+               local nxt = values[ m+ 1]
+
+               --if curr = next dont make a cutpoint,
+               --else find the average and store it
+               if(curr ~= nxt) then
+                  local cutpoint = ((curr + nxt) / 2)
+                  local lower = (smallest .. ".." .. cutpoint)
+                  local upper = (cutpoint .. ".." .. largest)
+                  io.write(smallest .. ".." .. cutpoint .. " , ")
+                  io.write(cutpoint .. ".." .. largest .. "\n")
+                  
+                  --add the cutpoint data to the ranges table
+                  self.ranges[lower] = {}
+                  self.ranges[lower].attr = k
+                  self.ranges[lower].low = smallest
+                  self.ranges[lower].high = cutpoint
+                  self.ranges[upper] = {}
+                  self.ranges[upper].attr = k
+                  self.ranges[upper].low = cutpoint
+                  self.ranges[upper].high = largest
+               end
+            end
+         end
+      end
+   end
+end
 
 
