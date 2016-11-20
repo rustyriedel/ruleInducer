@@ -4,9 +4,9 @@
 !  
 [ sepal_length sepal_width petal_length petal_width class  ]
 !   
-! Now comes the actual data. Please note that one example 
+! Now comes the actual data. Please note that one example
 ! does NOT necessarily occupy one physical line
-!   
+!
 4.3..5.4 3..4.4 1..4.8 0.1..1 Iris-setosa 
 4.3..5.4 3..4.4 1..4.8 0.1..1 Iris-setosa 
 4.3..5.4 3..4.4 1..4.8 0.1..1 Iris-setosa 

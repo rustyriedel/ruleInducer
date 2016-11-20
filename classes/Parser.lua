@@ -15,6 +15,7 @@ function Parser:new()
       
       wordIndex = 2,
       filePath = "datasets/normal/test.txt"
+      --filePath = "datasets/normal/iris-49-aca.txt"
    }
    setmetatable(o, self)
    return o
@@ -26,14 +27,13 @@ function Parser:parse()
    
    --read the file contents into a buffer variable
    local buffer = f:read("*a")
+   --print(buffer)
+   --close the file
+   f:close()
    
    --remove comments from the buffer before processing the 
    --rest of the file using a regular expression for pattern matching
-   local removeStr = buffer:match("[!]+[^\n]*[\n]")
-   while(removeStr ~= nil) do
-      buffer = buffer:gsub(removeStr, "")
-      removeStr = buffer:match("[!]+[^\n]*[\n]")
-   end
+   buffer = buffer:gsub("!.-\n", "")
    
    --split the rest of the buffer into words 
    --seperated by spaces, tabs and newline characters
@@ -43,9 +43,6 @@ function Parser:parse()
    
    --parse the words table to populate the parser variables
    self:parseWords()
-   
-   --close the input file
-   f:close()
 end
 
 function Parser:parseWords()
@@ -94,11 +91,22 @@ function Parser:parseWords()
       --fill the case with its attributes and decision
       for i = 1, self.numAttributes + 1 do
          self.cases[caseIndex][i] = self.words[self.wordIndex]
-         local temp = self.cases[caseIndex][i]
-         print(temp:match("%d+[^'..']*%d*"))
---         if(self.cases[caseIndex][i].type()) then
---            self.needsDescritization[caseIndex] = true
---         end
+         
+         --disregard processing on descision values
+         if(i ~= self.numAttributes + 1) then
+            --if the case value is a number, match it with regex
+            local initialStr = self.cases[caseIndex][i]
+            local matched = initialStr:match("[%-]?%d*['.']?%d+")
+            if(matched == initialStr) then
+               --the value is a number, convert it to a number
+               self.cases[caseIndex][i] = tonumber(matched)
+               --print for DEBUG
+               print(matched)
+               self.needsDescritization[caseIndex] = true
+            end
+         end
+         
+         --increment the word index
          self.wordIndex = self.wordIndex + 1
       end
       
@@ -106,10 +114,4 @@ function Parser:parseWords()
       caseIndex = caseIndex + 1
    end
 end
-
-
-
-
-
-
 

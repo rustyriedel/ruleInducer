@@ -34,6 +34,8 @@ function RuleInducer:run()
    --self:printAttributeValues()
    self:calcAstar()
    self:calcDstar()
+   io.write("is dataset consistant?: ")
+   io.write(tostring(self:isDataSetConsistant()) .. "\n")
    self:calcAVBlocks()
    self:induceRules()
 end
@@ -48,9 +50,6 @@ function RuleInducer:parseData()
    self.decisionName = fileParser.decisionName
    self.cases = fileParser.cases
    self.needsDescritization = fileParser.needsDescritization
-   
-   --used to overwrite the data for testing of cutpoints DEBUG
-   self:fillTestData()
    
    --descritize the data set if needed
    self:descritize()
@@ -106,7 +105,7 @@ function RuleInducer:fillTestData()
    self.cases[7] = {"big", "blue", "hard", "low", "so-so"}
    self.cases[8] = {"big", "blue", "hard", "high", "so-so"}
    --]]
-   ---[[
+   --[[
    self.numAttributes = 3
    self.numCases = 7
    self.attributeNames = {"A", "B", "C"}
@@ -217,6 +216,25 @@ function RuleInducer:calcDstar()
    end
 end
 
+function RuleInducer:isDataSetConsistant()
+   for k, v in pairs(self.Astar) do
+      local flag = false
+      for m, n in pairs(self.Dstar) do
+         if(v:subset(n)) then
+            flag = true
+         end
+      end
+      
+      --check if the current partition of A* is a 
+      --subset of a partition in {d}*
+      if(flag == false) then
+         return false
+      end
+   end
+   
+   return true
+end
+
 function RuleInducer:calcAVBlocks()
    --build avBlocks sets for the each av pair
    for k, v in pairs(self.av) do
@@ -232,6 +250,7 @@ function RuleInducer:calcAVBlocks()
          local attr = self.attributeNames[j]
          --local val = self.cases[i][j]
          local val = self:calcValue(i, j)
+         
          --if the value is a number, insert it into each appropriate
          --[(a,v)] block if it fits into the range
          if(type(val) == "number") then
@@ -246,8 +265,8 @@ function RuleInducer:calcAVBlocks()
                end
             end
          else
+            
             --enter the value into the appropriate set
-            --local value = self:calcValue(i, j)
             self.avBlocks[attr][val]:insert(i)
          end
       end
@@ -454,11 +473,17 @@ end
 
 function RuleInducer:reduceRule(pRule, pG)
    local result = clone(pRule)
+   local numConditions = #result
    --return rule if only 1 condition
    if(#result > 1) then
       --try dropping conditions
       --mark a rule to drop with droppedIndex
       for droppedIndex = 1, #result do
+         --if only one condition left, return the rule
+         if(numConditions == 1) then
+            break
+         end
+         
          local testRule = {}
          for k, v in pairs(result) do
             if(k ~= droppedIndex) then
@@ -472,6 +497,7 @@ function RuleInducer:reduceRule(pRule, pG)
          if(self:isRuleConsistant(testRule, pG)) then
             --drop the condition
             result[droppedIndex] = nil
+            numConditions = numConditions - 1
          end
       end
       
