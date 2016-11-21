@@ -22,6 +22,8 @@ function RuleInducer:new()
       needsDescritization = {},
       ranges = {},
       
+      kSets = {},
+      
       outputFile = "ruleSet.txt"
    }
    setmetatable(o, self)
@@ -36,7 +38,9 @@ function RuleInducer:run()
    self:calcDstar()
    io.write("is dataset consistant?: ")
    io.write(tostring(self:isDataSetConsistant()) .. "\n")
-   self:calcAVBlocks()
+   self:calcAVBlocks()   
+   --k sets only need to be computed if using approximations
+   self:calcCharacteristicSets()
    self:induceRules()
 end
 
@@ -154,6 +158,63 @@ function RuleInducer:getAttributeValues()
    for i = 1, self.numCases do
       local temp = self.cases[i][self.numAttributes + 1]
       self.concepts[temp] = true
+   end
+end
+
+--only needs to be computed if the data set is inconsistant
+function RuleInducer:calcCharacteristicSets()
+   --create a universal set
+   local U = Set:new()
+   for i = 1, self.numCases do
+      U:insert(i)
+   end
+   
+   --compute a characteristic set for each case
+   for k, v in ipairs(self.cases) do
+      local toIntersect = {}
+      for i = 1, self.numAttributes do
+         if(v[i] == "?" or v[i] == "*") then
+            --for ? and * k(x,a) = U
+            table.insert(toIntersect, U)
+         elseif(v[i] == "-") then
+            --if V(x,a) = empty set, insert U, otherwise U[(a,v)]
+            local V = self:calcValue(k, i)
+            --calcValue returns a ? if the set is empty, so insert U
+            if(V == "?") then
+               table.insert(toIntersect, U)
+            else
+               --U[(a,v)] in the talbe V
+               local result = Set:new()
+               for m, n in pairs(V) do
+                  local set = self.avBlocks[self.attributeNames[i]][n]
+                  result = result:union(set)
+               end
+               table.insert(toIntersect, result)
+            end
+         elseif(type(v[i]) == "number") then
+            --find all the [(a,v)] block ranges that it fits in
+            local attr = self.attributeNames[i]
+            local set = Set:new()
+            for m, n in pairs(self.avBlocks[attr]) do
+               local range = self.ranges[m]
+               if(v[i] >= range.low and v[i] <= range.high) then
+                  set = set:union(self.avBlocks[attr][m])
+               end
+            end
+            table.insert(toIntersect, set)
+         else
+            --non missing value, just add the [(a,v)] to the table
+            local attr = self.attributeNames[i]
+            table.insert(toIntersect, self.avBlocks[attr][v[i]])
+         end
+      end
+      
+      --compute the k set intersections
+      self.kSets[k] = Set:new()
+      self.kSets[k] = self.kSets[k]:union(toIntersect[1])
+      for i = 2, self.numAttributes do
+         self.kSets[k] = self.kSets[k]:intersect(toIntersect[i])
+      end
    end
 end
 
@@ -292,7 +353,6 @@ function RuleInducer:calcValue(pCase, pAttribute)
       local dontCare = {}
       local attr = self.attributeNames[pAttribute]
       for k, v in pairs(self.av[attr]) do
-         print(k)
          table.insert(dontCare, k)
       end
       return dontCare
@@ -307,7 +367,6 @@ function RuleInducer:calcValue(pCase, pAttribute)
          -- k = case in the concept
          local vote = self.cases[k][pAttribute]
          if(vote ~= "-" and vote ~= "?") then
-            print(vote)
             if(votes[vote] == nil) then
                votes[vote] = 1
             else
@@ -666,7 +725,6 @@ function RuleInducer:descritize()
             local val = self.cases[i][k]
             --if(val ~= "?" or val ~= "*" or val ~= "-") then
             if(type(val) == "number") then
-               --print(val)
                table.insert(values, val)
             end
          end
