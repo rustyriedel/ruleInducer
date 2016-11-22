@@ -124,11 +124,22 @@ function RuleInducer:calcCharacteristicSets()
             if(V == "?") then
                table.insert(toIntersect, U)
             else
-               --U[(a,v)] in the talbe V
+               --U[(a,v)] in the table V
                local result = Set:new()
                for m, n in pairs(V) do
-                  local set = self.avBlocks[self.attributeNames[i]][n]
-                  result = result:union(set)
+                  if(type(n) == "number") then
+                     --get the ranges each number is in an U[(a,v)]
+                     local attr = self.attributeNames[i]
+                     for o, p in pairs(self.avBlocks[attr]) do
+                        local range = self.ranges[o]
+                        if(n >= range.low and n <= range.high) then
+                           result = result:union(self.avBlocks[attr][o])
+                        end
+                     end
+                  else
+                     local set = self.avBlocks[self.attributeNames[i]][n]
+                     result = result:union(set)
+                  end
                end
                table.insert(toIntersect, result)
             end
@@ -320,7 +331,20 @@ function RuleInducer:calcAVBlocks()
             --* and - values will return a table, so add each
             --value in the table to its appropriate set
             for k, v in pairs(val) do
-               self.avBlocks[attr][v]:insert(i)
+               if(type(v) == "number") then
+                  --get a range
+                  for m, n in pairs(self.ranges) do
+                     --check if that range is for the current attribute
+                     if(n.attr == j) then
+                        --check if the value fits in the range
+                        if(v >= n.low and v <= n.high) then
+                           self.avBlocks[attr][m]:insert(i)
+                        end
+                     end
+                  end
+               else
+                  self.avBlocks[attr][v]:insert(i)
+               end
             end
          elseif(val == "?") then
             --lost data so disregard, dont enter it anywhere.

@@ -1,3 +1,0 @@
-(Temperature, low) -> (Trip, no)
-(Temperature, high) & (Wind, high) -> (Trip, no)
-(Temperature, high) & (Wind, low) -> (Trip, yes)
