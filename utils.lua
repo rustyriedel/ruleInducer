@@ -16,3 +16,15 @@ function clone (t) -- deep-copy a table
     setmetatable(target, meta)
     return target
 end
+
+--got this function to check if a file exists from stack overflow
+--http://stackoverflow.com/questions/4990990/lua-check-if-a-file-exists
+function fileExists(name)
+   local f=io.open(name,"r")
+   if f~=nil then 
+      io.close(f) 
+      return true
+   else 
+      return false 
+   end
+end

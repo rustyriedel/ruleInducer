@@ -7,13 +7,11 @@ require "classes/RuleInducer"
 --require "tests/setTest"
 
 inducer = RuleInducer:new()
---inducer:getUserInput()
 inducer:parseData()
 inducer:run()
 
 
 
 --TODO
---upper and lower approximations
 --input interface
 --test several data sets

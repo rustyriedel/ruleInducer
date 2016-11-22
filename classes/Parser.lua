@@ -14,20 +14,60 @@ function Parser:new()
       needsDescritization = {},
       
       wordIndex = 2,
-      --filePath = "datasets/normal/trip.txt"
-      filePath = "datasets/normal/iris-49-aca.txt"
+      filePath = "",
+      outputFilePath = "",
+      ruleType = 0
    }
    setmetatable(o, self)
    return o
 end
 
+function Parser:getUserInput()
+   --initial prompt
+   io.write("Please enter the name of the input file:\n(include path if the file is not in the same directory as this program)\n")
+   
+   --loop asking for a valid file
+   local inputFileFlag = false
+   while(inputFileFlag == false) do
+      self.filePath = io.read()
+   
+      --make sure the file can be opened, if not ask again
+      inputFileFlag = fileExists(self.filePath)
+      if(inputFileFlag == false) then
+         io.write("Not a valid file! Please enter a different file name:\n")
+      end
+   end
+   
+   --ask for certain or possible rules
+   io.write("What kind of rules would you like to induce?\n1 - Certain\n2 - Possible\nEnter (1 or 2):\n")
+   
+   --loop until a valid answer is recieved
+   local ruleFlag = false
+   while(ruleFlag == false) do
+      self.ruleType = io.read()
+      
+      if(self.ruleType == '1' or self.ruleType == '2') then
+         ruleFlag = true
+      else
+         io.write("Please enter a valid selection\n1 - Certain\n2 - Possible\nEnter (1 or 2):\n")
+      end
+   end
+   
+   --get output file name
+   io.write("Please enter the name of the output file:\n")
+   self.outputFilePath = io.read()
+end
+
 function Parser:parse()
+   --get the users valid input
+   self:getUserInput()
+   
    --open the file to parse
    local f = assert(io.open(self.filePath, "r"))
    
    --read the file contents into a buffer variable
    local buffer = f:read("*a")
-   --print(buffer)
+   
    --close the file
    f:close()
    

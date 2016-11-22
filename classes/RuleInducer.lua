@@ -24,7 +24,8 @@ function RuleInducer:new()
       
       kSets = {},
       
-      outputFile = "ruleSet.txt"
+      outputFile = "",
+      ruleType = 0
    }
    setmetatable(o, self)
    return o
@@ -32,16 +33,31 @@ end
 
 function RuleInducer:run()
    self:getAttributeValues()
+   
    self:calcAstar()
    self:calcDstar()
+   
+   --check if the dataset is consistant
    io.write("is dataset consistant?: ")
    io.write(tostring(self:isDataSetConsistant()) .. "\n")
+   
    self:calcAVBlocks()   
-   --k sets only need to be computed if using approximations
    self:calcCharacteristicSets()
-   self:calcUpperConceptApprox()
+   
+   --compute certain or possible rules based on input
+   if(self.ruleType == '1') then
+      --calculate lower approximations for certain rues
+      self:calcLowerConceptApprox()
+   else
+      --calculate upper approximations for possible rules
+      self:calcUpperConceptApprox()
+   end
+   
+   --check if the new approximations are consistant
    io.write("is dataset consistant?: ")
    io.write(tostring(self:isDataSetConsistant()) .. "\n")
+   
+   --run the LEM2 algorithm to induce rules and output them to a file
    self:induceRules()
 end
 
@@ -55,6 +71,8 @@ function RuleInducer:parseData()
    self.decisionName = fileParser.decisionName
    self.cases = fileParser.cases
    self.needsDescritization = fileParser.needsDescritization
+   self.outputFile = fileParser.outputFilePath
+   self.ruleType = fileParser.ruleType
    
    --descritize the data set if needed
    self:descritize()
