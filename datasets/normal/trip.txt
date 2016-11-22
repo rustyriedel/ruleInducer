@@ -1,0 +1,10 @@
+< a a a d >
+!this is a comment
+[ 	Wind	Humidity	Temperature	Trip ]
+	?	high		low		no
+	low	*		-		yes
+	*	low		?		yes
+	low	-		high		yes
+	high	high		low		no
+	-	low		?		no
+	high	low		high		no

@@ -41,6 +41,7 @@ function RuleInducer:run()
    self:calcAVBlocks()   
    --k sets only need to be computed if using approximations
    self:calcCharacteristicSets()
+   self:calcLowerConceptApprox()
    self:induceRules()
 end
 
@@ -216,6 +217,41 @@ function RuleInducer:calcCharacteristicSets()
          self.kSets[k] = self.kSets[k]:intersect(toIntersect[i])
       end
    end
+end
+
+--creates lower concept approximations for certain rules
+function RuleInducer:calcLowerConceptApprox()
+   --save the concepts for the approximations
+   local oldGoals = clone(self.Dstar)
+   
+   --clear the Dstar table
+   --make sure the coverage table lines up with new concepts
+   --coverage is built in calcDstar, so call that again when
+   --the approximations are all entered into the cleared concepts table
+   --self.coverage = {}
+   self.Dstar = {}
+   
+   --compute lower concept approximations 
+   for k, v in pairs(oldGoals) do
+      local goal = Set:new()
+      
+      --compute the lower approximations from the characteristic sets
+      --if KA(x) is a subset of the concept, U[KA(x)] = lower approx
+      for m, n in ipairs(self.kSets) do
+         if(n:subset(v)) then
+            goal = goal:union(n)
+         end
+      end
+      
+      --insert the approximations into Dstar
+      self.Dstar[k] = goal
+   end
+   
+   --recompute 
+end
+
+function RuleInducer:calcUpperConceptApprox()
+   
 end
 
 function RuleInducer:calcAstar()

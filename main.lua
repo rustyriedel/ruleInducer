@@ -10,7 +10,6 @@ inducer = RuleInducer:new()
 inducer:parseData()
 inducer:run()
 
-print('done!')
 
 
 --TODO

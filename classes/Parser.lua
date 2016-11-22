@@ -14,7 +14,7 @@ function Parser:new()
       needsDescritization = {},
       
       wordIndex = 2,
-      filePath = "datasets/normal/test.txt"
+      filePath = "datasets/normal/trip.txt"
       --filePath = "datasets/normal/iris-49-aca.txt"
    }
    setmetatable(o, self)
