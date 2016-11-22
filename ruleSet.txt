@@ -1,3 +1,5 @@
-(Temperature, low) -> (Trip, no)
-(Temperature, high) & (Wind, high) -> (Trip, no)
-(Temperature, high) & (Wind, low) -> (Trip, yes)
+(petal_length, 4.8..6.9) -> (class, Iris-viginica)
+(sepal_length, 4.3..5.4) & (petal_width, 1..2.5) -> (class, Iris-viginica)
+(petal_width, 1..2.5) & (sepal_length, 5.4..7.1) -> (class, Iris-versicolor)
+(petal_length, 1..4.8) & (petal_width, 1..2.5) -> (class, Iris-versicolor)
+(petal_width, 0.1..1) -> (class, Iris-setosa)

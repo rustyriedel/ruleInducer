@@ -31,9 +31,7 @@ function RuleInducer:new()
 end
 
 function RuleInducer:run()
-   --self:fillTestData()
    self:getAttributeValues()
-   --self:printAttributeValues()
    self:calcAstar()
    self:calcDstar()
    io.write("is dataset consistant?: ")
@@ -41,7 +39,9 @@ function RuleInducer:run()
    self:calcAVBlocks()   
    --k sets only need to be computed if using approximations
    self:calcCharacteristicSets()
-   self:calcLowerConceptApprox()
+   self:calcUpperConceptApprox()
+   io.write("is dataset consistant?: ")
+   io.write(tostring(self:isDataSetConsistant()) .. "\n")
    self:induceRules()
 end
 
@@ -225,10 +225,6 @@ function RuleInducer:calcLowerConceptApprox()
    local oldGoals = clone(self.Dstar)
    
    --clear the Dstar table
-   --make sure the coverage table lines up with new concepts
-   --coverage is built in calcDstar, so call that again when
-   --the approximations are all entered into the cleared concepts table
-   --self.coverage = {}
    self.Dstar = {}
    
    --compute lower concept approximations 
@@ -246,11 +242,28 @@ function RuleInducer:calcLowerConceptApprox()
       --insert the approximations into Dstar
       self.Dstar[k] = goal
    end
-   
-   --recompute 
 end
 
 function RuleInducer:calcUpperConceptApprox()
+   --save the concepts for the approximations
+   local oldGoals = clone(self.Dstar)
+   
+   --clear the Dstar table
+   self.Dstar = {}
+
+   --compute upper concept approximations 
+   for k, v in pairs(oldGoals) do
+      local goal = Set:new()
+      
+      --compute the lower approximations from the characteristic sets
+      --for each element x in the set goal = U[KA(x)]
+      for m, n in pairs(v.data) do
+         goal = goal:union(self.kSets[m])
+      end
+      
+      --insert the approximations into Dstar
+      self.Dstar[k] = goal
+   end
    
 end
 

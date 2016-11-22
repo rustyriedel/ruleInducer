@@ -7,6 +7,7 @@ require "classes/RuleInducer"
 --require "tests/setTest"
 
 inducer = RuleInducer:new()
+--inducer:getUserInput()
 inducer:parseData()
 inducer:run()
 
