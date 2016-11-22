@@ -37,10 +37,6 @@ function RuleInducer:run()
    self:calcAstar()
    self:calcDstar()
    
-   --check if the dataset is consistant
-   io.write("is dataset consistant?: ")
-   io.write(tostring(self:isDataSetConsistant()) .. "\n")
-   
    self:calcAVBlocks()   
    self:calcCharacteristicSets()
    
@@ -53,10 +49,6 @@ function RuleInducer:run()
       self:calcUpperConceptApprox()
    end
    
-   --check if the new approximations are consistant
-   io.write("is dataset consistant?: ")
-   io.write(tostring(self:isDataSetConsistant()) .. "\n")
-   
    --run the LEM2 algorithm to induce rules and output them to a file
    self:induceRules()
 end
@@ -65,6 +57,7 @@ function RuleInducer:parseData()
    local fileParser = Parser:new()
    fileParser:parse()
    
+   --add the needed values from the parser to the RuleInducer class
    self.numAttributes = fileParser.numAttributes
    self.numCases = #fileParser.cases
    self.attributeNames = fileParser.attributeNames
@@ -76,77 +69,6 @@ function RuleInducer:parseData()
    
    --descritize the data set if needed
    self:descritize()
-   
-   --print for DEBUG
-   print("!!DONE PARSING!!")
-end
-
-function RuleInducer:fillTestData()
-   --[[
-   self.numAttributes = 3
-   self.numCases = 8
-   self.attributeNames = {"Height", "Hair", "Eyes"}
-   self.decisionName = "Attractive"
-
-   self.cases[1] = {"short", "blonde",   "blue",  "+"}
-   self.cases[2] = {"tall",  "blonde",   "brown", "-"}
-   --self.cases[2] = {"short", "blonde",   "blue",  "-"}
-   self.cases[3] = {"tall",  "red",      "blue",  "+"}
-   self.cases[4] = {"short", "dark",     "blue",  "-"}
-   self.cases[5] = {"tall",  "dark",     "blue",  "-"}
-   self.cases[6] = {"tall",  "blonde",   "blue",  "+"}
-   self.cases[7] = {"tall",  "dark",     "brown", "-"}
-   self.cases[8] = {"short", "blonde",   "brown", "-"}
-   --]]
-   --[[
-   self.numAttributes = 3
-   self.numCases = 8
-   self.attributeNames = {"Wind", "Humidity", "Temperature"}
-   self.decisionName = "Trip"
-
-   self.cases[1] = {"low",    "low",      "medium",   "yes"}
-   self.cases[2] = {"low",    "low",      "low",      "yes"}
-   self.cases[3] = {"low",    "medium",   "medium",   "yes"}
-   self.cases[4] = {"low",    "medium",   "high",     "maybe"}
-   self.cases[5] = {"medium", "low",      "medium",   "maybe"}
-   self.cases[6] = {"medium", "high",     "low",      "no"}
-   self.cases[7] = {"high",   "high",     "high",     "no"}
-   self.cases[8] = {"medium", "high",     "high",     "no"}
-   --]]
-   --[[--INCONSISTANT DATA SET FROM HOMEWORK #2
-   self.numAttributes = 4
-   self.numCases = 8
-   self.attributeNames = {"Size", "Color", "Feel", "Temperature"}
-   self.decisionName = "Attitude"
-
-   self.cases[1] = {"big", "yellow", "soft", "low", "positive"}
-   self.cases[2] = {"big", "yellow", "hard", "high", "negative"}
-   self.cases[3] = {"medium", "yellow", "soft", "high", "positive"}
-   self.cases[4] = {"medium", "blue", "hard", "high", "so-so"}
-   self.cases[5] = {"medium", "blue", "hard", "high", "so-so"}
-   self.cases[6] = {"medium", "blue", "soft", "low", "negative"}
-   self.cases[7] = {"big", "blue", "hard", "low", "so-so"}
-   self.cases[8] = {"big", "blue", "hard", "high", "so-so"}
-   --]]
-   --[[
-   self.numAttributes = 3
-   self.numCases = 7
-   self.attributeNames = {"A", "B", "C"}
-   self.decisionName = "D"
-   
-   self.cases[1] = {0.8, 0.3, 7.2,  "very-small"}
-   self.cases[2] = {0.8, 1.1, 7.2,  "small"}
-   self.cases[3] = {0.8, 1.1, 10.2, "medium"}
-   self.cases[4] = {1.2, 0.3, 10.2, "medium"}
-   self.cases[5] = {1.2, 2.3, 10.2, "medium"}
-   self.cases[6] = {2.0, 2.3, 10.2, "high"}
-   self.cases[7] = {2.0, 2.3, 15.2, "very-high"}
-   
-   --for DEBUG
-   for i = 1, 3 do
-      self.needsDescritization[i] = true
-   end
-   --]]
 end
 
 function RuleInducer:getAttributeValues()
@@ -533,10 +455,6 @@ function RuleInducer:induceRules()
 
    --induce rules for to cover the dataset via LEM2
    while(finished == false) do
-      --print the goal for debugging
-      io.write("G = ")
-      G:printSet()
-      
       --calculate the intersections of avBlocks with G
       local col = self:calcCol(avBlocks, G)
       
@@ -584,7 +502,6 @@ function RuleInducer:induceRules()
             remainingG = clone(G)
             
             if(G == 0) then
-               print("FINISHED INDUCING RULES!!")
                finished = true
             end
          else
@@ -596,15 +513,12 @@ function RuleInducer:induceRules()
          end
       else
          --otherwise compute new G and add more conditions to rule
-         print("!NEED ANOTHER CONDITION!")
          local ruleCover = self:ruleCoverage(rule)
          G = G:intersect(ruleCover)
          
          --remove the condition from the local avBlocks table
          avBlocks[pickAttr][pickVal] = nil
       end
-      
-      print("done with iteration!")
    end
    
    --print the rules set
@@ -631,12 +545,6 @@ function RuleInducer:pickAVpair(pPairs, pG)
       end
    end
    
-   --print for DEBUG
-   print("largest size")
-   for k,v in pairs(max) do
-      print(pPairs[v].attr, pPairs[v].val)
-   end
-   
    --if only one a,v pair is the largest, return that, otherwise
    --we must check the cardinality of each set in max
    if(#max == 1)then
@@ -661,15 +569,10 @@ function RuleInducer:pickAVpair(pPairs, pG)
       end
    end
    
-   --print for DEBUG
-   print("most relevant")
-   print(pPairs[smallestIndex].attr, pPairs[smallestIndex].val)
-   
    --return smallestIndex, it will be of the smallest size because
    --it is checked against all other a,v blocks, and if there are
    --multiple with the same size, the top one is our heuristic pick
    return pPairs[smallestIndex].attr, pPairs[smallestIndex].val
-   
 end
 
 function RuleInducer:reduceRule(pRule, pG)
@@ -746,7 +649,6 @@ function RuleInducer:calcCol(pAvBlocks, pG)
          col[i] = {}
          col[i].attr = k
          col[i].val = m
-         --col[i].set = Set:new()
          col[i].set = n:intersect(pG)
          col[i].size = col[i].set:cardinality()
          i = i + 1
@@ -773,7 +675,6 @@ end
 function RuleInducer:writeRuleSetToFile(pRuleSet)
    local f = io.open(self.outputFile, "w+")
    for k, v in pairs(pRuleSet) do
-      print(v)
       f:write(v .. "\n")
    end
    
@@ -813,8 +714,6 @@ function RuleInducer:descritize()
                   local cutpoint = ((curr + nxt) / 2)
                   local lower = (smallest .. ".." .. cutpoint)
                   local upper = (cutpoint .. ".." .. largest)
-                  io.write(smallest .. ".." .. cutpoint .. " , ")
-                  io.write(cutpoint .. ".." .. largest .. "\n")
                   
                   --add the cutpoint data to the ranges table
                   self.ranges[lower] = {}

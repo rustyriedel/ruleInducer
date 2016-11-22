@@ -1,9 +1,9 @@
---parser class
+--Parser class
 
 Parser = {}
 Parser.__index = Parser
 
---constructor
+--Constructor
 function Parser:new()
    local o = {
       numAttributes = 0,
@@ -88,7 +88,6 @@ end
 function Parser:parseWords()
    --count the number of attributes
    while(true) do
-      
       if(self.words[self.wordIndex] == 'a' or 
             self.words[self.wordIndex] == 'x') then
          self.numAttributes = self.numAttributes + 1
@@ -140,8 +139,6 @@ function Parser:parseWords()
             if(matched == initialStr) then
                --the value is a number, convert it to a number
                self.cases[caseIndex][i] = tonumber(matched)
-               --print for DEBUG
-               print(matched)
                self.needsDescritization[caseIndex] = true
             end
          end

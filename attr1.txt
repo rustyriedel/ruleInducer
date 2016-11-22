@@ -1,0 +1,4 @@
+(Eyes, blue) & (Hair, blonde) -> (Attractive, +)
+(Hair, red) -> (Attractive, +)
+(Hair, dark) -> (Attractive, -)
+(Height, short) -> (Attractive, -)
