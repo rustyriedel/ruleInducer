@@ -25,7 +25,8 @@ function RuleInducer:new()
       kSets = {},
       
       outputFile = "",
-      ruleType = 0
+      ruleType = 0,
+      hasMissingValues = false
    }
    setmetatable(o, self)
    return o
@@ -40,13 +41,19 @@ function RuleInducer:run()
    self:calcAVBlocks()   
    self:calcCharacteristicSets()
    
-   --compute certain or possible rules based on input
-   if(self.ruleType == '1') then
-      --calculate lower approximations for certain rues
-      self:calcLowerConceptApprox()
-   else
-      --calculate upper approximations for possible rules
-      self:calcUpperConceptApprox()
+   
+   --if hasMissingValues flag is false, no need to do
+   --an approx if the data set is consistant
+   local con = self:isDataSetConsistant()
+   if(self.hasMissingValues == true or con == false) then
+      --compute certain or possible rules based on input
+      if(self.ruleType == '1') then
+         --calculate lower approximations for certain rues
+         self:calcLowerConceptApprox()
+      else
+         --calculate upper approximations for possible rules
+         self:calcUpperConceptApprox()
+      end
    end
    
    --run the LEM2 algorithm to induce rules and output them to a file
@@ -66,6 +73,7 @@ function RuleInducer:parseData()
    self.needsDescritization = fileParser.needsDescritization
    self.outputFile = fileParser.outputFilePath
    self.ruleType = fileParser.ruleType
+   self.hasMissingValues = fileParser.hasMissingValues
    
    --descritize the data set if needed
    self:descritize()

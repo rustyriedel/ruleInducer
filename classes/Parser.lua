@@ -16,7 +16,8 @@ function Parser:new()
       wordIndex = 2,
       filePath = "",
       outputFilePath = "",
-      ruleType = 0
+      ruleType = 0,
+      hasMissingValues = false
    }
    setmetatable(o, self)
    return o
@@ -131,6 +132,12 @@ function Parser:parseWords()
       for i = 1, self.numAttributes + 1 do
          self.cases[caseIndex][i] = self.words[self.wordIndex]
          
+         --set flag if the value is missing
+         local wrd = self.cases[caseIndex][i]
+         if(wrd == "?" or wrd == "*" or wrd == "-") then
+            self.hasMissingValues = true
+         end
+               
          --disregard processing on descision values
          if(i ~= self.numAttributes + 1) then
             --if the case value is a number, match it with regex
