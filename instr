@@ -1,0 +1,335 @@
+echo "1 - attr.txt certain noJit"
+time lua main.lua <<EOF
+datasets/normal/attr.txt
+1
+ruleSets/1.txt
+EOF
+
+echo "2 - attr.txt possible noJit"
+time lua main.lua <<EOF
+datasets/normal/attr.txt
+2
+ruleSets/2.txt
+EOF
+
+echo "3 - attr.txt certain JIT"
+time luajit main.lua <<EOF
+datasets/normal/attr.txt
+1
+ruleSets/3.txt
+EOF
+
+echo "4 - attr.txt possible JIT"
+time luajit main.lua <<EOF
+datasets/normal/attr.txt
+2
+ruleSets/4.txt
+EOF
+
+echo "5 - attractive.txt certain noJit"
+time lua main.lua <<EOF
+datasets/normal/attractive.txt
+1
+ruleSets/5.txt
+EOF
+
+echo "6 - attractive.txt possible noJit"
+time lua main.lua <<EOF
+datasets/normal/attractive.txt
+2
+ruleSets/6.txt
+EOF
+
+echo "7 - attractive.txt certain JIT"
+time luajit main.lua <<EOF
+datasets/normal/attractive.txt
+1
+ruleSets/7.txt
+EOF
+
+echo "8 - attractive.txt possible JIT"
+time luajit main.lua <<EOF
+datasets/normal/attractive.txt
+2
+ruleSets/8.txt
+EOF
+
+echo "9 - bank-35.txt certain noJit"
+time lua main.lua <<EOF
+datasets/normal/bank-35.txt
+1
+ruleSets/9.txt
+EOF
+
+echo "10 - bank-35.txt possible noJit"
+time lua main.lua <<EOF
+datasets/normal/bank-35.txt
+2
+ruleSets/10.txt
+EOF
+
+echo "11 - bank-35.txt certain JIT"
+time luajit main.lua <<EOF
+datasets/normal/bank-35.txt
+1
+ruleSets/11.txt
+EOF
+
+echo "12 - bank-35.txt possible JIT"
+time luajit main.lua <<EOF
+datasets/normal/bank-35.txt
+2
+ruleSets/12.txt
+EOF
+
+echo "13 - echo-35.txt certain noJit"
+time lua main.lua <<EOF
+datasets/normal/echo-35.txt
+1
+ruleSets/13.txt
+EOF
+
+echo "14 - echo-35.txt possible noJit"
+time lua main.lua <<EOF
+datasets/normal/echo-35.txt
+2
+ruleSets/14.txt
+EOF
+
+echo "15 - echo-35.txt certain JIT"
+time luajit main.lua <<EOF
+datasets/normal/echo-35.txt
+1
+ruleSets/15.txt
+EOF
+
+echo "16 - echo-35.txt possible JIT"
+time luajit main.lua <<EOF
+datasets/normal/echo-35.txt
+2
+ruleSets/16.txt
+EOF
+
+echo "17 - echo-40.txt certain noJit"
+time lua main.lua <<EOF
+datasets/normal/echo-40.txt
+1
+ruleSets/17.txt
+EOF
+
+echo "18 - echo-40.txt possible noJit"
+time lua main.lua <<EOF
+datasets/normal/echo-40.txt
+2
+ruleSets/18.txt
+EOF
+
+echo "19 - echo-40.txt certain JIT"
+time luajit main.lua <<EOF
+datasets/normal/echo-40.txt
+1
+ruleSets/19.txt
+EOF
+
+echo "20 - echo-40.txt possible JIT"
+time luajit main.lua <<EOF
+datasets/normal/echo-40.txt
+2
+ruleSets/20.txt
+EOF
+
+echo "21 - image-35.txt certain noJit"
+time lua main.lua <<EOF
+datasets/normal/image-35.txt
+1
+ruleSets/21.txt
+EOF
+
+echo "22 - image-35.txt possible noJit"
+time lua main.lua <<EOF
+datasets/normal/image-35.txt
+2
+ruleSets/22.txt
+EOF
+
+echo "23 - image-35.txt certain JIT"
+time luajit main.lua <<EOF
+datasets/normal/image-35.txt
+1
+ruleSets/23.txt
+EOF
+
+echo "24 - image-35.txt possible JIT"
+time luajit main.lua <<EOF
+datasets/normal/image-35.txt
+2
+ruleSets/24.txt
+EOF
+
+echo "25 - iris-49-aca.txt certain noJit"
+time lua main.lua <<EOF
+datasets/normal/iris-49-aca.txt
+1
+ruleSets/25.txt
+EOF
+
+echo "26 - iris-49-aca.txt possible noJit"
+time lua main.lua <<EOF
+datasets/normal/iris-49-aca.txt
+2
+ruleSets/26.txt
+EOF
+
+echo "27 - iris-49-aca.txt certain JIT"
+time luajit main.lua <<EOF
+datasets/normal/iris-49-aca.txt
+1
+ruleSets/27.txt
+EOF
+
+echo "28 - iris-49-aca.txt possible JIT"
+time luajit main.lua <<EOF
+datasets/normal/iris-49-aca.txt
+2
+ruleSets/28.txt
+EOF
+
+echo "29 - test.txt certain noJit"
+time lua main.lua <<EOF
+datasets/normal/test.txt
+1
+ruleSets/29.txt
+EOF
+
+echo "30 - test.txt possible noJit"
+time lua main.lua <<EOF
+datasets/normal/test.txt
+2
+ruleSets/30.txt
+EOF
+
+echo "31 - test.txt certain JIT"
+time luajit main.lua <<EOF
+datasets/normal/test.txt
+1
+ruleSets/31.txt
+EOF
+
+echo "32 - test.txt possible JIT"
+time luajit main.lua <<EOF
+datasets/normal/test.txt
+2
+ruleSets/32.txt
+EOF
+
+echo "33 - trip.txt certain noJit"
+time lua main.lua <<EOF
+datasets/normal/trip.txt
+1
+ruleSets/33.txt
+EOF
+
+echo "34 - trip.txt possible noJit"
+time lua main.lua <<EOF
+datasets/normal/trip.txt
+2
+ruleSets/34.txt
+EOF
+
+echo "35 - trip.txt certain JIT"
+time luajit main.lua <<EOF
+datasets/normal/trip.txt
+1
+ruleSets/35.txt
+EOF
+
+echo "36 - trip.txt possible JIT"
+time luajit main.lua <<EOF
+datasets/normal/trip.txt
+2
+ruleSets/36.txt
+EOF
+
+echo "37 - austr.txt certain noJit"
+time lua main.lua <<EOF
+datasets/normal/austr.txt
+1
+ruleSets/37.txt
+EOF
+
+echo "38 - austr.txt possible noJit"
+time lua main.lua <<EOF
+datasets/normal/austr.txt
+2
+ruleSets/38.txt
+EOF
+
+echo "39 - austr.txt certain JIT"
+time luajit main.lua <<EOF
+datasets/normal/austr.txt
+1
+ruleSets/39.txt
+EOF
+
+echo "40 - austr.txt possible JIT"
+time luajit main.lua <<EOF
+datasets/normal/austr.txt
+2
+ruleSets/40.txt
+EOF
+
+echo "41 - common_combined_lers.txt certain noJit"
+time lua main.lua <<EOF
+datasets/normal/common_combined_lers.txt
+1
+ruleSets/41.txt
+EOF
+
+echo "42 - common_combined_lers.txt possible noJit"
+time lua main.lua <<EOF
+datasets/normal/common_combined_lers.txt
+2
+ruleSets/42.txt
+EOF
+
+echo "43 - common_combined_lers.txt certain JIT"
+time luajit main.lua <<EOF
+datasets/normal/common_combined_lers.txt
+1
+ruleSets/43.txt
+EOF
+
+echo "44 - common_combined_lers.txt possible JIT"
+time luajit main.lua <<EOF
+datasets/normal/common_combined_lers.txt
+2
+ruleSets/44.txt
+EOF
+
+echo "45 - keller-train-ca.txt certain noJit"
+time lua main.lua <<EOF
+datasets/normal/keller-train-ca.txt
+1
+ruleSets/45.txt
+EOF
+
+echo "46 - keller-train-ca.txt possible noJit"
+time lua main.lua <<EOF
+datasets/normal/keller-train-ca.txt
+2
+ruleSets/46.txt
+EOF
+
+echo "47 - keller-train-ca.txt certain JIT"
+time luajit main.lua <<EOF
+datasets/normal/keller-train-ca.txt
+1
+ruleSets/47.txt
+EOF
+
+echo "48 - keller-train-ca.txt possible JIT"
+time luajit main.lua <<EOF
+datasets/normal/keller-train-ca.txt
+2
+ruleSets/48.txt
+EOF
