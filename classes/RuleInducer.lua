@@ -150,7 +150,11 @@ function RuleInducer:calcCharacteristicSets()
             for m, n in pairs(self.avBlocks[attr]) do
                local range = self.ranges[m]
                if(v[i] >= range.low and v[i] <= range.high) then
-                  set = set:union(self.avBlocks[attr][m])
+                  if(set:cardinality() == 0) then
+                     set = set:union(self.avBlocks[attr][m])
+                  else
+                     set = set:intersect(self.avBlocks[attr][m])
+                  end
                end
             end
             table.insert(toIntersect, set)
